@@ -104,7 +104,7 @@ export default function ImageToPdfPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen p-4">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
-        <p className="mt-4 text-muted-foreground">Loading PDF to IMG by Webkits.co...</p>
+        <p className="mt-4 text-muted-foreground">Loading pic2pdf...</p>
       </div>
     );
   }
@@ -115,7 +115,7 @@ export default function ImageToPdfPage() {
         <div className="container mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2">
             <ImageIcon className="h-8 w-8 text-primary" />
-            <h1 className="text-3xl font-bold text-foreground">PDF to IMG <span className="text-primary">by Webkits.co</span></h1>
+            <h1 className="text-3xl font-bold text-foreground">pic2pdf</h1>
           </div>
           <Button asChild variant="outline">
             <Link href="#waitlist">Join Waitlist</Link>
@@ -189,8 +189,8 @@ export default function ImageToPdfPage() {
       </main>
 
       <footer className="text-center py-6 px-4 sm:px-8 text-sm text-muted-foreground bg-card border-t">
-        <p>&copy; {new Date().getFullYear()} PDF to IMG by Webkits.co. All rights reserved.</p>
-        <p className="mt-1">Powered by magic (and Webkits.co code).</p>
+        <p>&copy; {new Date().getFullYear()} pic2pdf. All rights reserved.</p>
+        <p className="mt-1">Powered by magic.</p>
       </footer>
     </div>
   );

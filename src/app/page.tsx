@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -111,7 +110,7 @@ export default function ImageToPdfPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
-      <header className="py-6 px-4 sm:px-8 shadow-sm bg-card">
+      <header className="py-6 px-4 sm:px-8 shadow-md bg-card">
         <div className="container mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2">
             <ImageIcon className="h-8 w-8 text-primary" />

@@ -13,7 +13,9 @@ import { z } from 'zod';
 
 // Define the input type for an individual image
 const ImageInputSchema = z.object({
-  dataUrl: z.string().startsWith('data:image/', { message: "Image dataUrl must start with 'data:image/'" }),
+  dataUrl: z.string().refine(val => val.startsWith('data:image/'), { 
+    message: "Image dataUrl must start with 'data:image/'" 
+  }),
   name: z.string(),
   type: z.string(), // e.g., 'image/jpeg', 'image/png'
 });
@@ -25,7 +27,9 @@ export type ConvertImagesInput = z.infer<typeof ConvertImagesInputSchema>;
 
 // Define the expected output structure from the Genkit flow
 const PdfOutputSchema = z.object({
-  pdfDataUrl: z.string().startsWith('data:application/pdf;base64,', { message: "PDF dataUrl must start with 'data:application/pdf;base64,'" }),
+  pdfDataUrl: z.string().refine(val => val.startsWith('data:application/pdf;base64,'), { 
+    message: "PDF dataUrl must start with 'data:application/pdf;base64,'" 
+  }),
   fileName: z.string(),
 });
 export type PdfOutput = z.infer<typeof PdfOutputSchema>;

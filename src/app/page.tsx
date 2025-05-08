@@ -79,8 +79,8 @@ export default function ImageToPdfPage() {
         toast({
           title: 'PDF Generated Successfully!',
           description: 'Your PDF is ready for download.',
-          variant: 'default', // Default variant often has neutral/positive styling
-          className: 'bg-accent text-accent-foreground border-accent', // Use success accent
+          variant: 'default', 
+          className: 'bg-accent text-accent-foreground border-accent', 
         });
       } else {
         throw new Error(result.error || 'Unknown error during PDF conversion.');
@@ -99,12 +99,10 @@ export default function ImageToPdfPage() {
   };
 
   if (!isClient) {
-    // Render a loading state or null during server-side rendering and initial client-side mount
-    // This helps avoid hydration mismatches if any component relies on window or browser APIs immediately
     return (
       <div className="flex flex-col items-center justify-center min-h-screen p-4">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
-        <p className="mt-4 text-muted-foreground">Loading Image2PDF Magic...</p>
+        <p className="mt-4 text-muted-foreground">Loading PDF to IMG by Webkits.co...</p>
       </div>
     );
   }
@@ -114,7 +112,7 @@ export default function ImageToPdfPage() {
       <header className="py-6 px-4 sm:px-8 shadow-sm bg-card">
         <div className="container mx-auto flex items-center gap-2">
           <ImageIcon className="h-8 w-8 text-primary" />
-          <h1 className="text-3xl font-bold text-foreground">Image2PDF <span className="text-primary">Magic</span></h1>
+          <h1 className="text-3xl font-bold text-foreground">PDF to IMG <span className="text-primary">by Webkits.co</span></h1>
         </div>
       </header>
 
@@ -184,8 +182,8 @@ export default function ImageToPdfPage() {
       </main>
 
       <footer className="text-center py-6 px-4 sm:px-8 text-sm text-muted-foreground bg-card border-t">
-        <p>&copy; {new Date().getFullYear()} Image2PDF Magic. All rights reserved.</p>
-        <p className="mt-1">Powered by magic (and code).</p>
+        <p>&copy; {new Date().getFullYear()} PDF to IMG by Webkits.co. All rights reserved.</p>
+        <p className="mt-1">Powered by magic (and Webkits.co code).</p>
       </footer>
     </div>
   );

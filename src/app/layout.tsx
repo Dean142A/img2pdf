@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Image2PDF Magic',
-  description: 'Convert your images to PDF with ease. Reorder and preview before converting.',
+  title: 'PDF to IMG by Webkits.co',
+  description: 'Convert your images to PDF with ease using PDF to IMG by Webkits.co. Reorder and preview before converting.',
 };
 
 export default function RootLayout({

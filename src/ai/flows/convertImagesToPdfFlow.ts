@@ -10,6 +10,8 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
+import { PDFDocument, rgb, StandardFonts, PageSizes } from 'pdf-lib';
+import { Buffer } from 'buffer'; // Node.js Buffer
 
 // Define the input type for an individual image
 const ImageInputSchema = z.object({
@@ -35,28 +37,93 @@ const PdfOutputSchema = z.object({
 export type PdfOutput = z.infer<typeof PdfOutputSchema>;
 
 // This is the Genkit flow definition.
-// It's not exported directly but is called by the exported wrapper function.
 const convertImagesToPdfFlowInternal = ai.defineFlow(
   {
-    name: 'convertImagesToPdfFlow', // Name for Genkit's registry
+    name: 'convertImagesToPdfFlow', 
     inputSchema: ConvertImagesInputSchema,
     outputSchema: PdfOutputSchema,
   },
   async (images) => {
-    // In a real application, this is where you would use a library
-    // like pdf-lib or call an external service/tool to generate the PDF from images.
-    // For this example, we'll create a very simple mock PDF.
-    
-    const imageNames = images.map(img => img.name).join(', ');
-    const fakePdfContent = `This is a mock PDF document. It would contain the following images: ${imageNames}.`;
-    
-    // Convert the mock content to a base64 string.
-    // In a real scenario, the PDF library would provide the PDF bytes.
-    const pdfBase64 = Buffer.from(fakePdfContent, 'utf-8').toString('base64');
-    const fileName = `converted-images-${Date.now()}.pdf`;
+    const pdfDoc = await PDFDocument.create();
+    const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
 
-    // Simulating some processing time, as PDF generation can take a moment.
-    await new Promise(resolve => setTimeout(resolve, 300 + images.length * 50)); // Simulate 0.3s + 50ms per image
+    for (const imageInput of images) {
+      const page = pdfDoc.addPage(PageSizes.A4);
+      const { width: pageWidth, height: pageHeight } = page.getSize();
+
+      // Extract base64 data from data URL
+      const base64Data = imageInput.dataUrl.substring(imageInput.dataUrl.indexOf(',') + 1);
+      const imageBytes = Buffer.from(base64Data, 'base64');
+
+      let embeddedImage;
+      try {
+        if (imageInput.type === 'image/jpeg' || imageInput.type === 'image/jpg') {
+          embeddedImage = await pdfDoc.embedJpg(imageBytes);
+        } else if (imageInput.type === 'image/png') {
+          embeddedImage = await pdfDoc.embedPng(imageBytes);
+        } else {
+          console.warn(`Unsupported image type: ${imageInput.type} for image ${imageInput.name}. Skipping and adding placeholder text.`);
+          page.drawText(`Unsupported image: ${imageInput.name} (type: ${imageInput.type})`, {
+            x: 50,
+            y: pageHeight - 50, // Position from top
+            size: 12,
+            font: helveticaFont,
+            color: rgb(0.9, 0.1, 0.1), // Red color for warning
+          });
+          continue; // Skip to the next image
+        }
+
+        const imageDims = embeddedImage.scale(1); // Get original dimensions
+
+        // Calculate scaling factor to fit image on page while maintaining aspect ratio
+        // Define margins (e.g., 50 points on each side)
+        const margin = 50;
+        const maxImgWidth = pageWidth - 2 * margin;
+        const maxImgHeight = pageHeight - 2 * margin;
+
+        let newWidth = imageDims.width;
+        let newHeight = imageDims.height;
+
+        // Scale width if it exceeds max width
+        if (newWidth > maxImgWidth) {
+          const scale = maxImgWidth / newWidth;
+          newWidth = maxImgWidth;
+          newHeight = newHeight * scale;
+        }
+
+        // Scale height if it exceeds max height (after potential width scaling)
+        if (newHeight > maxImgHeight) {
+          const scale = maxImgHeight / newHeight;
+          newHeight = maxImgHeight;
+          newWidth = newWidth * scale; // Adjust width again if height scaling was dominant
+        }
+        
+        // Center the image on the page
+        const x = (pageWidth - newWidth) / 2;
+        const y = (pageHeight - newHeight) / 2;
+
+        page.drawImage(embeddedImage, {
+          x: x,
+          y: y,
+          width: newWidth,
+          height: newHeight,
+        });
+
+      } catch (embedError) {
+        console.error(`Error embedding image ${imageInput.name} (type: ${imageInput.type}):`, embedError);
+        page.drawText(`Error embedding image: ${imageInput.name}. It may be corrupted or an unsupported subtype.`, {
+            x: 50,
+            y: pageHeight - 70, // Slightly lower to avoid overlap with potential unsupported message
+            size: 10,
+            font: helveticaFont,
+            color: rgb(0.9, 0.1, 0.1),
+        });
+      }
+    }
+
+    const pdfBytes = await pdfDoc.save(); // Returns Uint8Array
+    const pdfBase64 = Buffer.from(pdfBytes).toString('base64');
+    const fileName = `converted-images-${Date.now()}.pdf`;
 
     return {
       pdfDataUrl: `data:application/pdf;base64,${pdfBase64}`,
@@ -67,8 +134,5 @@ const convertImagesToPdfFlowInternal = ai.defineFlow(
 
 // Exported async wrapper function that clients (e.g., Server Actions) will call
 export async function convertImagesToPdfFlow(input: ConvertImagesInput): Promise<PdfOutput> {
-  // The Genkit flow `convertImagesToPdfFlowInternal` will automatically validate the input
-  // against `ConvertImagesInputSchema`. If validation fails, it will throw a ZodError.
-  // Similarly, it ensures the output matches `PdfOutputSchema`.
   return convertImagesToPdfFlowInternal(input);
 }
